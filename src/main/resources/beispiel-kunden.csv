@@ -1,0 +1,6 @@
+customerId,customerType,loyaltyDiscountPercent
+C-1001,VIP,7.5
+C-1002,STANDARD,
+C-1003,PREMIUM,3.0
+C-1004,STANDARD,
+C-1005,VIP,10.0
