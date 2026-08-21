@@ -3,7 +3,6 @@ package lernen.orderapp.config;
 import lernen.orderapp.entity.Customer;
 import lernen.orderapp.entity.CustomerType;
 import lernen.orderapp.repository.CustomerRepository;
-//import lernen.orderapp.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -12,12 +11,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
 
 @Order(0)
@@ -25,28 +22,23 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SeedDataLoader implements CommandLineRunner {
     private final CustomerRepository customerRepository;
-    //private final OrderRepository orderRepository;
-
-
 
     @Override
     public void run(String... args)  {
 
 
-        //Musterbank Münster, BIC MUSTDE55XXX
         try (Reader in = Files.newBufferedReader(Path.of("src/main/resources/beispiel-kunden.csv"));){
                  final CSVParser parser = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).get().parse(in);
 
-            for (CSVRecord record : parser) {
+            for (CSVRecord csvrecord : parser) {
                 final Customer customer = new Customer();
-                customer.setId(record.get("customerId"));
-                customer.setCustomerType(CustomerType.valueOf(record.get("customerType")));
-                final String loyalty = record.get("loyaltyDiscountPercent");
+                customer.setId(csvrecord.get("customerId"));
+                customer.setCustomerType(CustomerType.valueOf(csvrecord.get("customerType")));
+                final String loyalty = csvrecord.get("loyaltyDiscountPercent");
                 if (loyalty != null && !loyalty.isBlank()) {
                     customer.setLoyaltyDiscountPercent(BigDecimal.valueOf(Double.parseDouble(loyalty)));
                 }
-                final Customer savedCustomer =customerRepository.save(customer);
-                System.out.println("result = " + savedCustomer);
+                customerRepository.save(customer);
 
             }
             //final List<String> result=Files.readAllLines(Path.of("src/main/resources/beispiel-kunden.csv"));

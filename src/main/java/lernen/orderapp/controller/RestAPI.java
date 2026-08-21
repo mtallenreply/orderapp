@@ -1,32 +1,74 @@
 package lernen.orderapp.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.constraints.NotBlank;
+import lernen.orderapp.service.OrderImportService;
+import lernen.orderapp.service.StatisticsAggregator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.job.parameters.InvalidJobParametersException;
+import org.springframework.batch.core.launch.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.launch.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.launch.JobRestartException;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDate;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @Validated
+@RequiredArgsConstructor
 public class RestAPI {
+    private final OrderImportService orderImportService;
+    private final StatisticsAggregator statisticsAggregator;
 
-    @PostMapping("/api/batch-jobs/order-import")
-    public void orderImport(){
-        //Startet einen Batch-Lauf für eine übergebene CSV-Datei
+    @Operation(summary = "Startet einen CSV Orderverarbeitungsjob", description = "Startet einen CSV Orderverarbeitungsjob")
+
+    @PostMapping(value = "/api/batch-jobs/order-import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Long postOrderImport(@RequestParam("file") MultipartFile file) throws IOException, JobInstanceAlreadyCompleteException, InvalidJobParametersException, JobExecutionAlreadyRunningException, JobRestartException {
+        final Path tempFile = Files.createTempFile("order-import-", ".csv");
+        Files.write(tempFile, file.getBytes());
+
+        return orderImportService.fileImport(tempFile);
+        //Startet einen Batch-Lauf und gibt eine ID zurück für eine übergebene CSV-Datei
     }
+    @Operation(summary = "Execution Job Ergebnis abfragen", description = "liefert eine Map mit Errgebnissen")
     @GetMapping("/api/batch-jobs/order-import/{executionId}")
-    public void getOrderImport( @PathVariable("executionId") @NotBlank  String executionId){
+    public  ExitStatus getOrderImport( @PathVariable("executionId")  Long executionId){
         //Liefert Status/Ergebnis eines Batch-Laufs
+        return orderImportService.getOrderImportStatus(executionId);
     }
+    @Operation(summary = "Bestellungen abfragen", description = "Filtert Bestellungen nach Kunde, Kanal und Zeitraum, optional sortiert nach Datum.")
     @GetMapping("/api/orders")
-    public void getOrders(){
+    public List<DTO.OrderResponse> getOrders(DTO.OrderRequest request){
         //Bestellungen abfragen; Filter nach customerId, Channel, dateFrom/dateTo; Paging & Sortierung
+        return  statisticsAggregator.getOrders(request.customerId(),request.channel(),request.dateFrom(),request.dateTo(),request.sorting())
+        .stream().map(DTO.OrderResponse::from).toList();
     }
+
+    @Operation(summary = "liefert Statistiken", description = "liefert Kundenstatistiken")
     @GetMapping("/api/customers/{customerId}/statistics")
-    public void getStatistics(@PathVariable("customerId") @NotBlank  String customerId){
+    public Map<String, Object> getStatistics(@PathVariable("customerId") @NotBlank  String customerId){
         //Aggregierte Kennzahlen für einen Kunden (Gesamtumsatz, Bestellanzahl)
+        return  statisticsAggregator.getStatisticsOfCustomer(customerId);
     }
-    @GetMapping("/api/statistics/top-customers?limit=5&dateFrom=...&dateTo=...")
-    public void getTopCustomers(){
+    @Operation(summary = "Liefert die besten Kunden", description = "Liefert die besten Kunden")
+    @GetMapping("/api/statistics/top-customers")
+
+    public List<String> getTopCustomers(@Parameter(description = "Maximale Anzahl zurückgegebener Kunden") @RequestParam("limit") Long limit,
+                                        @Parameter(description = "Start des Auswertungszeitraums (yyyy-MM-dd)") @RequestParam("dateFrom") LocalDate dateFrom,
+                                        @Parameter(description = "Ende des Auswertungszeitraums (yyyy-MM-dd)") @RequestParam("dateTo") LocalDate dateTo){
         //Top-Kunden nach Umsatz im Zeitraum
+        return statisticsAggregator.calcTop(dateFrom,dateTo,limit);
     }
 
 }

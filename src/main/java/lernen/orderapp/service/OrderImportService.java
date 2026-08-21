@@ -1,65 +1,40 @@
 package lernen.orderapp.service;
 
-import lernen.orderapp.batch.OrderImportZeile;
-import lernen.orderapp.entity.Channel;
-import lernen.orderapp.entity.Customer;
-import lernen.orderapp.entity.CustomerType;
-import lernen.orderapp.entity.Order;
-import lernen.orderapp.repository.CustomerRepository;
-import lernen.orderapp.repository.OrderRepository;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.job.Job;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.job.parameters.*;
+import org.springframework.batch.core.launch.*;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.sql.Date;
-
-
-import static lernen.orderapp.service.DiscountCalculator.calculateDiscount;
+import java.nio.file.Path;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class OrderImportService {
-    private final OrderRepository orderRepository;
-    private final CustomerRepository customerRepository;
+    private final JobOperator jobOperator;
+    private final Job orderImportJob;
+    private final JobRepository jobRepository;
 
-    public Order orderImport(OrderImportZeile orderImportZeile) throws Exception {
-
-        // customer id prüfen wenn vorhanden dann dort zuordnen
-        // wenn nicht dann anlegen
-
-        final Customer customer = customerRepository.findById(orderImportZeile.customerId())
-                .orElseGet(() -> {
-                    Customer neu = new Customer();
-                    neu.setId(orderImportZeile.customerId());
-                    neu.setCustomerType(CustomerType.STANDARD);
-                    neu.setLoyaltyDiscountPercent(BigDecimal.ZERO);
-                    neu.setCustomerName(orderImportZeile.customerName());
-                    return customerRepository.save(neu);
-                });
-        if(!orderImportZeile.customerName().equals(customer.getCustomerName())) {
-            customer.setCustomerName(orderImportZeile.customerName());
-            customerRepository.save(customer);
-        }
-        final Order newOrder=new Order();
-        newOrder.setId(orderImportZeile.orderId());
-        newOrder.setOrderDate(Date.valueOf(orderImportZeile.orderDate()));
-        newOrder.setProductSku(orderImportZeile.productSku());
-        newOrder.setCustomer(customer);
-        newOrder.setQuantity(orderImportZeile.quantity());
-        newOrder.setUnitPrice(orderImportZeile.unitPrice());
-        newOrder.setChannel(Channel.valueOf(orderImportZeile.channel()));
-            //4.2
-        final BigDecimal discount =calculateDiscount(orderImportZeile, customer);
-        //4.3 zum teil
-        newOrder.setDiscountFactor(discount);
-        newOrder.setResultingPrice(orderImportZeile.unitPrice().multiply(BigDecimal.ONE.subtract(discount)));
-        return newOrder;
-        }
-
+    public Long fileImport(Path csvFile) throws JobInstanceAlreadyCompleteException,
+            InvalidJobParametersException, JobExecutionAlreadyRunningException, JobRestartException {
+        JobParameters params = new JobParametersBuilder()
+                .addLong("time", System.currentTimeMillis())
+                .addString("inputFile", csvFile.toAbsolutePath().toString())
+                .toJobParameters();
+        JobExecution jobex = jobOperator.start(orderImportJob, params);
+        return jobex.getId();
     }
 
-
-
-
-
-
+    public ExitStatus getOrderImportStatus( Long executionId) {
+        JobExecution jobExecution = jobRepository.getJobExecution(executionId);
+        if (jobExecution == null) {
+            throw new JobExecutionNotFoundException(executionId);
+        }
+        return jobExecution.getExitStatus();
+    }
+}

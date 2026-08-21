@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
@@ -23,21 +24,21 @@ public  class DiscountCalculator {
     private static final IntPredicate upperDiscountBorder = qty -> qty >= 50;
     private static final Function<OrderImportZeile,BigDecimal> quantityDiscountCalc=(a)
             ->
-            lowerDiscountBorder.test(a.quantity()) ? QUANTITY_DISCOUNT_50
-                    : upperDiscountBorder.test(a.quantity()) ? QUANTITY_DISCOUNT_10
+            upperDiscountBorder.test(a.quantity()) ? QUANTITY_DISCOUNT_50
+                    : lowerDiscountBorder.test(a.quantity()) ? QUANTITY_DISCOUNT_10
                     : BigDecimal.ZERO;
 
     private static final Function<OrderImportZeile,BigDecimal> channelDiscountCalc= (line)
             -> line.channel().equals(Channel.PARTNER.toString()) ? PARTNER_DISCOUNT : BigDecimal.ZERO;
 
     private static final Function<Customer,BigDecimal> loyaltyDiscountCalc= (customer)
-            -> Optional.ofNullable(customer.getLoyaltyDiscountPercent()).orElse(BigDecimal.ZERO);
+            -> Optional.ofNullable(customer.getLoyaltyDiscountPercent()).orElse(BigDecimal.ZERO).divide(BigDecimal.valueOf(100) ,4, RoundingMode.HALF_UP);
 
     public static BigDecimal calculateDiscount(OrderImportZeile orderImportZeile, Customer customer) {
         final BigDecimal quantityDiscount = quantityDiscountCalc.apply(orderImportZeile);
         final BigDecimal channelDiscount = channelDiscountCalc.apply(orderImportZeile);
-        final BigDecimal loyaltyDicount = loyaltyDiscountCalc.apply(customer);
-        final BigDecimal totalDiscount = quantityDiscount.add(channelDiscount).add(loyaltyDicount);
+        final BigDecimal loyaltyDiscount = loyaltyDiscountCalc.apply(customer);
+        final BigDecimal totalDiscount = quantityDiscount.add(channelDiscount).add(loyaltyDiscount);
         return totalDiscount.min(MAX_DISCOUNT);
 }
 }
