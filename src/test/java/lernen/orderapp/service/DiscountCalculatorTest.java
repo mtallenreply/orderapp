@@ -28,7 +28,7 @@ class DiscountCalculatorTest {
         customer.setId("customerId");
         customer.setCustomerName("customerName");
         customer.setCustomerType(CustomerType.PREMIUM);
-        customer.setLoyaltyDiscountPercent(new BigDecimal("0.15"));
+        customer.setLoyaltyDiscountPercent(new BigDecimal("15"));
         final Order order = new Order();
         customer.setOrders(List.of(order));
 
@@ -52,7 +52,7 @@ class DiscountCalculatorTest {
         customer.setId("customerId");
         customer.setCustomerName("customerName");
         customer.setCustomerType(CustomerType.PREMIUM);
-        customer.setLoyaltyDiscountPercent(new BigDecimal("0.15"));
+        customer.setLoyaltyDiscountPercent(new BigDecimal("15"));
         final Order order = new Order();
         customer.setOrders(List.of(order));
 
@@ -60,7 +60,7 @@ class DiscountCalculatorTest {
         final BigDecimal result = DiscountCalculator.calculateDiscount(orderImportZeile, customer);
 
         // Verify the results
-        assertThat(result).isEqualTo(new BigDecimal("0.2"));
+        assertThat(result).isEqualTo(new BigDecimal("0.2000"));
     }
     @Test
     void testCalculateDiscount3() {
@@ -76,7 +76,7 @@ class DiscountCalculatorTest {
         customer.setId("customerId");
         customer.setCustomerName("customerName");
         customer.setCustomerType(CustomerType.PREMIUM);
-        customer.setLoyaltyDiscountPercent(new BigDecimal("0.15"));
+        customer.setLoyaltyDiscountPercent(new BigDecimal("15"));
         final Order order = new Order();
         customer.setOrders(List.of(order));
 
@@ -84,6 +84,6 @@ class DiscountCalculatorTest {
         final BigDecimal result = DiscountCalculator.calculateDiscount(orderImportZeile, customer);
 
         // Verify the results
-        assertThat(result).isEqualTo(new BigDecimal("0.18"));
+        assertThat(result).isEqualTo(new BigDecimal("0.1800"));
     }
 }

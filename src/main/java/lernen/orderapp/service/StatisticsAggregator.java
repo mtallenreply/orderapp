@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -57,7 +58,7 @@ public class StatisticsAggregator {
                 .orElseThrow(() -> new CustomerNotFoundException(customerId));
 
         final Long numberOfOrdersCustomer = (long) orderRepository.findByCustomer_Id(customerId).size();
-        final Long totalEarningsCustomer = (long) orderRepository.findByCustomer_Id(customerId).size();
+        final BigDecimal totalEarningsCustomer = orderRepository.sumEarningsByCustomerId(customerId);
         final Map<String, Object> result=new HashMap<>();
         //Aggregierte Kennzahlen für einen Kunden (Gesamtumsatz, Bestellanzahl)
         result.put("number of Orders",numberOfOrdersCustomer);
@@ -77,7 +78,8 @@ public class StatisticsAggregator {
         return orderList.stream()
                 .filter(filterTime)
                 .collect(
-                        Collectors.groupingBy(order -> order.getCustomer().getCustomerName(),
+                        Collectors.groupingBy(order -> Optional.ofNullable(order.getCustomer().getCustomerName())
+                                        .orElse(order.getCustomer().getId()),
                         Collectors.reducing(BigDecimal.ZERO, earningsCalc,
                                 BigDecimal::add)))
 

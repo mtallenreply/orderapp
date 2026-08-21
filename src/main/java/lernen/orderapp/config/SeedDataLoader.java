@@ -8,6 +8,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 
-@Order(0)
+@Order(Ordered.HIGHEST_PRECEDENCE)
 @Component
 @RequiredArgsConstructor
 public class SeedDataLoader implements CommandLineRunner {
@@ -27,7 +28,7 @@ public class SeedDataLoader implements CommandLineRunner {
     public void run(String... args)  {
 
 
-        try (Reader in = Files.newBufferedReader(Path.of("src/main/resources/beispiel-kunden.csv"));){
+        try (Reader in = Files.newBufferedReader(Path.of("src/main/resources/beispiel-kunden.csv"))){
                  final CSVParser parser = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).get().parse(in);
 
             for (CSVRecord csvrecord : parser) {

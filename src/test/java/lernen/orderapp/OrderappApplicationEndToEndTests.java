@@ -95,7 +95,7 @@ class OrderappApplicationEndToEndTests {
                 "/api/customers/{customer_id}/statistics", Map.class,"C-1001");
         System.out.println("response = " + response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        final var  expected=Map.of( "Total Earnings",5, "number of Orders",5);
+        final var  expected=Map.of( "Total Earnings",752.2, "number of Orders",5);
         assertThat(response.getBody()).containsAllEntriesOf(expected);
     }
     @Test

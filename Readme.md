@@ -5,14 +5,18 @@
 Starte die App
 
 ```Bash
-MVNW Run App
-
+# Bauen (kompiliert + führt Tests aus)
+./mvnw clean install
 ```
-
-Starte Tests
+# Nur starten (ohne Tests)
 
 ```Bash
-MVNW Run App
+./mvnw spring-boot:run
+```
+# Nur Tests ausführen
+
+```Bash
+./mvnw test
 ```
 ## FAQ 
 
