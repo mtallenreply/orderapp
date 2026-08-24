@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 
 import java.util.List;
@@ -36,7 +38,11 @@ public class RestAPI {
     @PostMapping(value = "/api/batch-jobs/order-import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Long postOrderImport(@RequestParam("file") MultipartFile file) throws IOException, JobInstanceAlreadyCompleteException, InvalidJobParametersException, JobExecutionAlreadyRunningException, JobRestartException {
         final Path tempFile = Files.createTempFile("order-import-", ".csv");
-        Files.write(tempFile, file.getBytes());
+        //Files.write(tempFile, file.getBytes()); // dies ist schlecht für sehr große Dateien wir wollen es lieber häppchenweise verarbeiten
+
+        try (InputStream in = file.getInputStream()) {
+            Files.copy(in, tempFile, StandardCopyOption.REPLACE_EXISTING);
+        }
 
         return orderImportService.fileImport(tempFile);
         //Startet einen Batch-Lauf und gibt eine ID zurück für eine übergebene CSV-Datei
