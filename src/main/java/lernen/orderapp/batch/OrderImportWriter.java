@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 public class OrderImportWriter implements ItemWriter<Order> {
     private final OrderRepository orderRepository;
     @Override
-    public void write(Chunk<? extends Order> chunk)   {
-        for (Order order : chunk) {
+    public void write(final Chunk<? extends Order> chunk)   {
+        for (final Order order : chunk) {
             orderRepository.save(order);
         }
 

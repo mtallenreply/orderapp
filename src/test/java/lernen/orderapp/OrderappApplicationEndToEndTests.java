@@ -23,7 +23,7 @@ class OrderappApplicationEndToEndTests {
     @Autowired
     final TestRestTemplate restTemplate;
     @Autowired
-    OrderappApplicationEndToEndTests( TestRestTemplate restTemplate) {
+    OrderappApplicationEndToEndTests( final TestRestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
     ResponseEntity<String> prepareDB(){

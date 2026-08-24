@@ -13,7 +13,7 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 @RequiredArgsConstructor
 @Service
-public  class DiscountCalculator {
+final public  class DiscountCalculator {
 
     private static final BigDecimal QUANTITY_DISCOUNT_10 = BigDecimal.valueOf(0.05);
     private static final BigDecimal QUANTITY_DISCOUNT_50 = BigDecimal.valueOf(0.10);
@@ -34,7 +34,7 @@ public  class DiscountCalculator {
     private static final Function<Customer,BigDecimal> loyaltyDiscountCalc= (customer)
             -> Optional.ofNullable(customer.getLoyaltyDiscountPercent()).orElse(BigDecimal.ZERO).divide(BigDecimal.valueOf(100) ,4, RoundingMode.HALF_UP);
 
-    public static BigDecimal calculateDiscount(OrderImportZeile orderImportZeile, Customer customer) {
+    public static BigDecimal calculateDiscount(final OrderImportZeile orderImportZeile,final Customer customer) {
         final BigDecimal quantityDiscount = quantityDiscountCalc.apply(orderImportZeile);
         final BigDecimal channelDiscount = channelDiscountCalc.apply(orderImportZeile);
         final BigDecimal loyaltyDiscount = loyaltyDiscountCalc.apply(customer);

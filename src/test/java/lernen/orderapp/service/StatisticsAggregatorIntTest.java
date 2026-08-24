@@ -2,8 +2,6 @@ package lernen.orderapp.service;
 
 
 import lernen.orderapp.entity.Channel;
-import lernen.orderapp.repository.CustomerRepository;
-import lernen.orderapp.repository.OrderRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,10 +35,6 @@ class StatisticsAggregatorIntTest {
     @Autowired
     private StatisticsAggregator statisticsAggregatorUnderTest;
     @Autowired
-    private CustomerRepository customerRepository;
-    @Autowired
-    private OrderRepository orderRepository;
-    @Autowired
     private TestRestTemplate restTemplate;
 
     @BeforeEach
@@ -51,7 +45,7 @@ class StatisticsAggregatorIntTest {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         final HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        final ResponseEntity<String> response = restTemplate.postForEntity(
+        final ResponseEntity<String> _ = restTemplate.postForEntity(
                 "/api/batch-jobs/order-import", requestEntity, String.class);
     }
 

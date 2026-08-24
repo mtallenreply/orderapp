@@ -36,11 +36,11 @@ public class RestAPI {
     @Operation(summary = "Startet einen CSV Orderverarbeitungsjob", description = "Startet einen CSV Orderverarbeitungsjob")
 
     @PostMapping(value = "/api/batch-jobs/order-import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Long postOrderImport(@RequestParam("file") MultipartFile file) throws IOException, JobInstanceAlreadyCompleteException, InvalidJobParametersException, JobExecutionAlreadyRunningException, JobRestartException {
+    public Long postOrderImport(@RequestParam("file") final MultipartFile file) throws IOException, JobInstanceAlreadyCompleteException, InvalidJobParametersException, JobExecutionAlreadyRunningException, JobRestartException {
         final Path tempFile = Files.createTempFile("order-import-", ".csv");
         //Files.write(tempFile, file.getBytes()); // dies ist schlecht für sehr große Dateien wir wollen es lieber häppchenweise verarbeiten
 
-        try (InputStream in = file.getInputStream()) {
+        try (final InputStream in = file.getInputStream()) {
             Files.copy(in, tempFile, StandardCopyOption.REPLACE_EXISTING);
         }
 
@@ -49,13 +49,13 @@ public class RestAPI {
     }
     @Operation(summary = "Execution Job Ergebnis abfragen", description = "liefert eine Map mit Errgebnissen")
     @GetMapping("/api/batch-jobs/order-import/{executionId}")
-    public  ExitStatus getOrderImport( @PathVariable("executionId")  Long executionId){
+    public  ExitStatus getOrderImport( @PathVariable("executionId")  final Long executionId){
         //Liefert Status/Ergebnis eines Batch-Laufs
         return orderImportService.getOrderImportStatus(executionId);
     }
     @Operation(summary = "Bestellungen abfragen", description = "Filtert Bestellungen nach Kunde, Kanal und Zeitraum, optional sortiert nach Datum.")
     @GetMapping("/api/orders")
-    public List<DTO.OrderResponse> getOrders(DTO.OrderRequest request){
+    public List<DTO.OrderResponse> getOrders(final DTO.OrderRequest request){
         //Bestellungen abfragen; Filter nach customerId, Channel, dateFrom/dateTo; Paging & Sortierung
         return  statisticsAggregator.getOrders(request.customerId(),request.channel(),request.dateFrom(),request.dateTo(),request.sorting())
         .stream().map(DTO.OrderResponse::from).toList();
@@ -63,16 +63,16 @@ public class RestAPI {
 
     @Operation(summary = "liefert Statistiken", description = "liefert Kundenstatistiken")
     @GetMapping("/api/customers/{customerId}/statistics")
-    public Map<String, Object> getStatistics(@PathVariable("customerId") @NotBlank  String customerId){
+    public Map<String, Object> getStatistics(@PathVariable("customerId") @NotBlank  final String customerId){
         //Aggregierte Kennzahlen für einen Kunden (Gesamtumsatz, Bestellanzahl)
         return  statisticsAggregator.getStatisticsOfCustomer(customerId);
     }
     @Operation(summary = "Liefert die besten Kunden", description = "Liefert die besten Kunden")
     @GetMapping("/api/statistics/top-customers")
 
-    public List<String> getTopCustomers(@Parameter(description = "Maximale Anzahl zurückgegebener Kunden") @RequestParam("limit") Long limit,
-                                        @Parameter(description = "Start des Auswertungszeitraums (yyyy-MM-dd)") @RequestParam("dateFrom") LocalDate dateFrom,
-                                        @Parameter(description = "Ende des Auswertungszeitraums (yyyy-MM-dd)") @RequestParam("dateTo") LocalDate dateTo){
+    public List<String> getTopCustomers(@Parameter(description = "Maximale Anzahl zurückgegebener Kunden") @RequestParam("limit") final Long limit,
+                                        @Parameter(description = "Start des Auswertungszeitraums (yyyy-MM-dd)") @RequestParam("dateFrom") final LocalDate dateFrom,
+                                        @Parameter(description = "Ende des Auswertungszeitraums (yyyy-MM-dd)") @RequestParam("dateTo") final LocalDate dateTo){
         //Top-Kunden nach Umsatz im Zeitraum
         return statisticsAggregator.calcTop(dateFrom,dateTo,limit);
     }

@@ -30,7 +30,7 @@ public class StatisticsAggregator {
     private final Function<Order,BigDecimal> earningsCalc
             =order -> order.getResultingPrice().multiply(BigDecimal.valueOf(order.getQuantity()));
 
-    public List<Order> getOrders(String customerId, Channel channel, LocalDate dateFrom, LocalDate dateTo, boolean sorting){
+    public List<Order> getOrders(final String customerId,final  Channel channel,final  LocalDate dateFrom, final LocalDate dateTo,final  boolean sorting){
         customerRepository.findById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException(customerId));
         if (sorting){
@@ -53,7 +53,7 @@ public class StatisticsAggregator {
        
     }
 
-    public Map<String,Object> getStatisticsOfCustomer(String customerId){
+    public Map<String,Object> getStatisticsOfCustomer(final  String customerId){
         customerRepository.findById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException(customerId));
 
@@ -67,7 +67,7 @@ public class StatisticsAggregator {
     }
   
     @Transactional
-    public List<String> calcTop(LocalDate from, LocalDate to, Long limit){
+    public List<String> calcTop(final LocalDate from, final LocalDate to, final Long limit){
         final List<Order> orderList=orderRepository.findAll();
 
 

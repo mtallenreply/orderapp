@@ -29,7 +29,7 @@ public class DTO {
             @Schema(description = "Bestelldatum") Date orderDate,
             @Schema(description = "Vertriebskanal: ONLINE, RETAIL, PARTNER") String channel
     ){
-        public static OrderResponse from(Order order) {
+        public static OrderResponse from(final Order order) {
             return new OrderResponse(
                     order.getId(),
                     order.getProductSku(),

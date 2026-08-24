@@ -18,18 +18,18 @@ public class OrderImportService {
     private final Job orderImportJob;
     private final JobRepository jobRepository;
 
-    public Long fileImport(Path csvFile) throws JobInstanceAlreadyCompleteException,
+    public Long fileImport(final Path csvFile) throws JobInstanceAlreadyCompleteException,
             InvalidJobParametersException, JobExecutionAlreadyRunningException, JobRestartException {
-        JobParameters params = new JobParametersBuilder()
+        final JobParameters params = new JobParametersBuilder()
                 .addLong("time", System.currentTimeMillis())
                 .addString("inputFile", csvFile.toAbsolutePath().toString())
                 .toJobParameters();
-        JobExecution jobex = jobOperator.start(orderImportJob, params);
+        final JobExecution jobex = jobOperator.start(orderImportJob, params);
         return jobex.getId();
     }
 
-    public ExitStatus getOrderImportStatus( Long executionId) {
-        JobExecution jobExecution = jobRepository.getJobExecution(executionId);
+    public ExitStatus getOrderImportStatus( final Long executionId) {
+        final JobExecution jobExecution = jobRepository.getJobExecution(executionId);
         if (jobExecution == null) {
             throw new JobExecutionNotFoundException(executionId);
         }

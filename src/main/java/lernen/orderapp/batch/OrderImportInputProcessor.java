@@ -23,7 +23,7 @@ public class OrderImportInputProcessor implements ItemProcessor<OrderImportZeile
     private final CustomerRepository customerRepository;
 
     @Override
-    public @Nullable Order process(OrderImportZeile orderImportZeile) {
+    public @Nullable Order process(final OrderImportZeile orderImportZeile) {
         Customer customer;
         try {
             customer = customerRepository.findById(orderImportZeile.customerId()).orElse(null);
@@ -35,7 +35,7 @@ public class OrderImportInputProcessor implements ItemProcessor<OrderImportZeile
                 neu.setCustomerName(orderImportZeile.customerName());
                 customer = customerRepository.save(neu);
             }
-        } catch (DataIntegrityViolationException e) {
+        } catch (final DataIntegrityViolationException e) {
             // ein anderer Thread war schneller und hat den Kunden bereits angelegt
             customer = customerRepository.findById(orderImportZeile.customerId())
                     .orElseThrow(() -> e);

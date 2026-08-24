@@ -43,7 +43,7 @@ public class OrderImportJobConfig {
     private final OrderImportInputProcessor processor;
     @Bean
     @StepScope
-    public FlatFileItemReader<OrderImportZeile> orderReader(@Value("#{jobParameters['inputFile']}") String inputFile) {
+    public FlatFileItemReader<OrderImportZeile> orderReader(@Value("#{jobParameters['inputFile']}") final String inputFile) {
 
         return new FlatFileItemReaderBuilder<OrderImportZeile>()
                 .name("orderReader")
@@ -57,7 +57,7 @@ public class OrderImportJobConfig {
 }
 
     @Bean
-    public RepositoryItemWriter<Order> orderWriter(OrderRepository orderRepository) {
+    public RepositoryItemWriter<Order> orderWriter(final OrderRepository orderRepository) {
         return new RepositoryItemWriterBuilder<Order>()
                 .repository(orderRepository)
                 .methodName("save")
@@ -65,7 +65,7 @@ public class OrderImportJobConfig {
     }
     @Bean
     public TaskExecutor taskExecutor() {
-        SimpleAsyncTaskExecutor executor= new SimpleAsyncTaskExecutor("orderImport-");
+        final SimpleAsyncTaskExecutor executor= new SimpleAsyncTaskExecutor("orderImport-");
         executor.setConcurrencyLimit(4);// ohne eventuell zu viele Threads
         return executor;
     }
@@ -73,17 +73,17 @@ public class OrderImportJobConfig {
     public SkipListener<OrderImportZeile, Order> skipListener() {
         return new SkipListener<>() {
             @Override
-            public void onSkipInRead(Throwable t) {
+            public void onSkipInRead(final Throwable t) {
                 log.warn("Zeile beim Lesen übersprungen: {}", t.getMessage());
             }
 
             @Override
-            public void onSkipInProcess(OrderImportZeile item, Throwable t) {
+            public void onSkipInProcess(final OrderImportZeile item, final Throwable t) {
                 log.warn("Zeile beim Verarbeiten übersprungen ({}): {}", item, t.getMessage());
             }
 
             @Override
-            public void onSkipInWrite(Order item, Throwable t) {
+            public void onSkipInWrite(final Order item, final Throwable t) {
                 log.warn("Order beim Schreiben übersprungen ({}): {}", item, t.getMessage());
             }
         };
@@ -92,11 +92,11 @@ public class OrderImportJobConfig {
     public JobExecutionListener tempFileCleanUpListener() {
        return new JobExecutionListener() {
            @Override
-           public void afterJob(@NonNull JobExecution jobExecution){
+           public void afterJob(@NonNull final JobExecution jobExecution){
                final String inputFile = jobExecution.getJobParameters().getString("inputFile");
                try {
                    Files.deleteIfExists(Path.of(Objects.requireNonNull(inputFile)));
-               } catch (IOException e) {
+               } catch (final IOException e) {
                    log.warn("Konnte Temp-Datei nicht löschen: {}", inputFile, e);
                }
 
@@ -104,9 +104,9 @@ public class OrderImportJobConfig {
        };
     }
     @Bean
-    public Step importStep(FlatFileItemReader<OrderImportZeile> orderReader,
-                           RepositoryItemWriter<Order> orderWriter,
-                           SkipListener<OrderImportZeile, Order> skipListener){
+    public Step importStep(final FlatFileItemReader<OrderImportZeile> orderReader,
+                           final RepositoryItemWriter<Order> orderWriter,
+                           final SkipListener<OrderImportZeile, Order> skipListener){
 
         return new StepBuilder("importStep", jobRepository)
                 .<OrderImportZeile, Order>chunk(1)// definiert commit Größe hier gerade ineffizient
@@ -122,7 +122,7 @@ public class OrderImportJobConfig {
                 .build();
     }
     @Bean
-    public Job orderImportJob(Step importStep) {
+    public Job orderImportJob(final Step importStep) {
         return new JobBuilder("ImportJob", jobRepository)
                 .start(importStep)
                 .listener(tempFileCleanUpListener())

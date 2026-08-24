@@ -26,13 +26,13 @@ public class SeedDataLoader implements CommandLineRunner {
     private final CustomerRepository customerRepository;
 
     @Override
-    public void run(String... args)  {
+    public void run(final String... args)  {
 
 
-        try (Reader in = Files.newBufferedReader(Path.of("src/main/resources/beispiel-kunden.csv"))){
+        try (final Reader in = Files.newBufferedReader(Path.of("src/main/resources/beispiel-kunden.csv"))){
                  final CSVParser parser = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).get().parse(in);
 
-            for (CSVRecord csvrecord : parser) {
+            for (final CSVRecord csvrecord : parser) {
                 final Customer customer = new Customer();
                 customer.setId(csvrecord.get("customerId"));
                 customer.setCustomerType(CustomerType.valueOf(csvrecord.get("customerType")));
@@ -56,7 +56,7 @@ public class SeedDataLoader implements CommandLineRunner {
 //            }
 
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             log.error("result = {}", e.getMessage());
         }
