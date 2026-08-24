@@ -27,6 +27,6 @@ public class Customer {
     @Column( updatable = false)
     private BigDecimal loyaltyDiscountPercent;    //Individueller Treuerabatt in Prozent – nicht bei jedem Kunden gesetzt
     @OneToMany(mappedBy= "customer")
-    List<Order> orders;
+    private List<Order> orders;
 }
 

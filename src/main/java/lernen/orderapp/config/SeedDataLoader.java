@@ -4,6 +4,7 @@ import lernen.orderapp.entity.Customer;
 import lernen.orderapp.entity.CustomerType;
 import lernen.orderapp.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -17,7 +18,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-
+@Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @Component
 @RequiredArgsConstructor
@@ -57,7 +58,7 @@ public class SeedDataLoader implements CommandLineRunner {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            log.error("result = {}", e.getMessage());
         }
     }
 }

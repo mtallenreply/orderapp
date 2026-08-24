@@ -1,5 +1,6 @@
 package lernen.orderapp;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.TestRestTemplate;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
+@Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
 class OrderappApplicationEndToEndTests {
@@ -40,7 +41,7 @@ class OrderappApplicationEndToEndTests {
     void postOrderImportTest()  {
         final ResponseEntity<String> response = prepareDB();
 
-        System.out.println("response = " + response);
+        log.info("response = {}", response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isInstanceOf(String.class);
         assertThat(response.getBody()).isEqualTo("1");
@@ -64,7 +65,7 @@ class OrderappApplicationEndToEndTests {
         );
         assertThat(response2.getBody()).containsAllEntriesOf(expected);
 
-        System.out.println("response = " + response);
+        log.info("response = {}", response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isInstanceOf(String.class);
 
@@ -77,7 +78,7 @@ class OrderappApplicationEndToEndTests {
                 "/api/orders?customerId={customerId}&channel={channel}&dateFrom={dateFrom}&dateTo={dateTo}&sorting={sorting}", List.class,
                 "C-1001", "ONLINE", "2026-01-01", "2026-12-31", true
                 );
-        System.out.println("response = " + response);
+        log.info("response = {}", response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         final List<Map<String, Object>> orders = response.getBody();
@@ -94,7 +95,7 @@ class OrderappApplicationEndToEndTests {
                 "/api/orders?customerId={customerId}&channel={channel}&dateFrom={dateFrom}&dateTo={dateTo}&sorting={sorting}", Exception.class,
                 "xy", "ONLINE", "2026-01-01", "2026-12-31", true
         );
-        System.out.println("response = " + response);
+        log.info("response = {}", response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
@@ -104,7 +105,7 @@ class OrderappApplicationEndToEndTests {
 
         final ResponseEntity<Map>  response = restTemplate.getForEntity(
                 "/api/customers/{customer_id}/statistics", Map.class,"C-1001");
-        System.out.println("response = " + response);
+        log.info("response = {}", response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         final Map<String, Object>  expected=Map.of( "Total Earnings",752.2, "number of Orders",5);
         assertThat(response.getBody()).containsAllEntriesOf(expected);
@@ -117,7 +118,7 @@ class OrderappApplicationEndToEndTests {
                 "/api/statistics/top-customers?limit={limit}&dateFrom={dateFrom}&dateTo={dateTo}",
                 List.class,
                 5, "1900-01-01", "2026-12-31");
-        System.out.println("response = " + response);
+        log.info("response = {}", response);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         final  List<String> expected= List.of( "Clara Voss",
