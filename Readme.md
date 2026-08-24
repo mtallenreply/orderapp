@@ -41,13 +41,23 @@ Man kann auf dieser Ebene es noch etwas anders gestalten:
    1. mit mehreren Spalten die zusammen als Primary Key definiert sind. Damit kann man dann z.B. order Id, quantity und productSku als gemeinsamen Primary Key nehmen. 
    Dies verhindert durch die Unique Constraint, dann dass doppelte Zeilendaten vorhanden sind.
    2. oder man baut noch einen echten Timestamp mit ein. Aber ein skaliertes System mit etlichen Bestellungen könnte dort auch an die Grenzen kommen und doch mal doppelte Timestamps ablegen wollen. 
-   3. (Meine Empfehlung)Oder ganz auf die Erzeugung von einer ID von außen verzichten,
+   3. (Meine Empfehlung + Vorabprüfung) Oder ganz auf die Erzeugung von einer ID von außen verzichten,
    dann würde man die ID selber generieren und man würde dann alle Bestellungen einzeln akzeptieren und ablegen.
 
 Vorab Prüfung:
 Man prüft immer vorher, ob die Order ID schon vorhanden ist, wenn ja, dann wird die Order nicht akzeptiert.
 - Eine Vorab-Prüfung würde Performance kosten, da man die DB jeweils vorher immer Abfragen müsste. 
-+ dies ist für Entwickler und für andere besser zu verstehen und weniger Fehler anfällig da es expliziter ist
++ dies ist für Entwickler und für Andere besser zu verstehen und weniger Fehler anfällig, da es expliziter ist
 
 
+2. **Nebenläufigkeit**: Die Verarbeitung der Bestellzeilen soll **parallelisiert** erfolgen (z.B. Spring Batch Partitioning
+   oder ein paralleler Step mit `TaskExecutor`). Die Wahl deines Ansatzes ist zu begründen.
+Wir haben hier einen einfachen Fall mit wenigen Zeilen Parallelisierung lohnt sich nicht wirklich. 
+-> Ich bin hier mit dem TaskExecutor vorgegangen
+
+Wenn wir millionen Datensätze verarbeiten wollen, dann würde man eher Partitioning nehmen. 
+Damit würde man die Performance am stärksten verbessern, da alle Schritte dann parallel laufen.
+Dazu müsste man noch eine Regel finden, woran man die Daten partitioniert 
+- anhand eines Zeitintervalls von X Tagen.
+- oder eine für jeden Lauf feste Batchgröße anzahlZeilen/anzahl Threads 
 

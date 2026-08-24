@@ -25,19 +25,20 @@ class OrderappApplicationEndToEndTests {
     OrderappApplicationEndToEndTests( TestRestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
-
-
-    @Test
-    void postOrderImportTest()  {
-
+    ResponseEntity<String> prepareDB(){
         final MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("file", new ClassPathResource("test-bestellungen.csv"));
         final  HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         final  HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        final ResponseEntity<String> response = restTemplate.postForEntity(
+        return restTemplate.postForEntity(
                 "/api/batch-jobs/order-import", requestEntity, String.class);
+    }
+
+    @Test
+    void postOrderImportTest()  {
+        final ResponseEntity<String> response = prepareDB();
 
         System.out.println("response = " + response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -47,14 +48,8 @@ class OrderappApplicationEndToEndTests {
     }
     @Test
     void getOrderImportwithStatusTest()  {
-        final MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", new ClassPathResource("test-bestellungen.csv"));
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        final HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+        final ResponseEntity<String> response = prepareDB();
 
-        final ResponseEntity<String>  response = restTemplate.postForEntity(
-                "/api/batch-jobs/order-import", requestEntity, String.class);
 
         final ResponseEntity<Map>  response2 = restTemplate.getForEntity(
                 "/api/batch-jobs/order-import/{executionId}", Map.class,1);
@@ -76,6 +71,8 @@ class OrderappApplicationEndToEndTests {
     }
     @Test
     void getOrdersTest()  {
+        final ResponseEntity<String> _ = prepareDB();
+
         final ResponseEntity<List>  response = restTemplate.getForEntity(
                 "/api/orders?customerId={customerId}&channel={channel}&dateFrom={dateFrom}&dateTo={dateTo}&sorting={sorting}", List.class,
                 "C-1001", "ONLINE", "2026-01-01", "2026-12-31", true
@@ -86,11 +83,13 @@ class OrderappApplicationEndToEndTests {
         final List<Map<String, Object>> orders = response.getBody();
         assertThat(orders).hasSize(2);
         assertThat(orders).extracting(o -> o.get("orderId"))
-                .containsExactlyInAnyOrder("ORD-2001", "ORD-2016");
+                .containsExactlyInAnyOrder("ORD-3011", "ORD-3026");
         assertThat(orders).allSatisfy(o -> assertThat(o).containsEntry("channel", "ONLINE"));
     }
     @Test
     void getOrdersNotFoundTest()  {
+        final ResponseEntity<String> _ = prepareDB();
+
         final ResponseEntity<Exception>  response = restTemplate.getForEntity(
                 "/api/orders?customerId={customerId}&channel={channel}&dateFrom={dateFrom}&dateTo={dateTo}&sorting={sorting}", Exception.class,
                 "xy", "ONLINE", "2026-01-01", "2026-12-31", true
@@ -101,6 +100,8 @@ class OrderappApplicationEndToEndTests {
 
     @Test
     void getStatisticsTest()  {
+        final ResponseEntity<String> _ = prepareDB();
+
         final ResponseEntity<Map>  response = restTemplate.getForEntity(
                 "/api/customers/{customer_id}/statistics", Map.class,"C-1001");
         System.out.println("response = " + response);
@@ -110,6 +111,8 @@ class OrderappApplicationEndToEndTests {
     }
     @Test
     void getTopCustomersTest()  {
+        final ResponseEntity<String> _ = prepareDB();
+
         final ResponseEntity<List> response = restTemplate.getForEntity(
                 "/api/statistics/top-customers?limit={limit}&dateFrom={dateFrom}&dateTo={dateTo}",
                 List.class,

@@ -4,9 +4,19 @@ package lernen.orderapp.service;
 import lernen.orderapp.entity.Channel;
 import lernen.orderapp.repository.CustomerRepository;
 import lernen.orderapp.repository.OrderRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 
 import java.math.BigDecimal;
@@ -16,8 +26,10 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment=RANDOM_PORT)
+@AutoConfigureTestRestTemplate
 class StatisticsAggregatorIntTest {
 
 
@@ -27,6 +39,20 @@ class StatisticsAggregatorIntTest {
     private CustomerRepository customerRepository;
     @Autowired
     private OrderRepository orderRepository;
+    @Autowired
+    private TestRestTemplate restTemplate;
+
+    @BeforeEach
+    void setUp() {
+        final MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", new ClassPathResource("test-bestellungen.csv"));
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        final HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        final ResponseEntity<String> response = restTemplate.postForEntity(
+                "/api/batch-jobs/order-import", requestEntity, String.class);
+    }
 
     @Test
     void testCalcNumberOfOrdersPerChannel() {
