@@ -10,6 +10,7 @@ import lernen.orderapp.service.DiscountCalculator;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.batch.infrastructure.item.ItemProcessor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -23,15 +24,22 @@ public class OrderImportInputProcessor implements ItemProcessor<OrderImportZeile
 
     @Override
     public @Nullable Order process(OrderImportZeile orderImportZeile) {
-        final Customer customer = customerRepository.findById(orderImportZeile.customerId())
-                .orElseGet(() -> {
-                    final Customer neu = new Customer();
-                    neu.setId(orderImportZeile.customerId());
-                    neu.setCustomerType(CustomerType.STANDARD);
-                    neu.setLoyaltyDiscountPercent(BigDecimal.ZERO);
-                    neu.setCustomerName(orderImportZeile.customerName());
-                    return customerRepository.save(neu);
-                });
+        Customer customer;
+        try {
+            customer = customerRepository.findById(orderImportZeile.customerId()).orElse(null);
+            if (customer == null) {
+                final Customer neu = new Customer();
+                neu.setId(orderImportZeile.customerId());
+                neu.setCustomerType(CustomerType.STANDARD);
+                neu.setLoyaltyDiscountPercent(BigDecimal.ZERO);
+                neu.setCustomerName(orderImportZeile.customerName());
+                customer = customerRepository.save(neu);
+            }
+        } catch (DataIntegrityViolationException e) {
+            // ein anderer Thread war schneller und hat den Kunden bereits angelegt
+            customer = customerRepository.findById(orderImportZeile.customerId())
+                    .orElseThrow(() -> e);
+        }
         if (!orderImportZeile.customerName().equals(customer.getCustomerName())) {
             customer.setCustomerName(orderImportZeile.customerName());
             customerRepository.save(customer);
