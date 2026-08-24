@@ -19,12 +19,12 @@ public class Customer {
     private String id;
     //das wird von den Beispieldaten nicht befüllt
     //Anzeigename des Kunden->  nullable da ich nicht von anfang an weiß was für ein Name der Kunde hat
-    @Column(nullable = true)
+    @Column()
     private String customerName;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CustomerType customerType;
-    @Column(nullable = true, updatable = false)
+    @Column( updatable = false)
     private BigDecimal loyaltyDiscountPercent;    //Individueller Treuerabatt in Prozent – nicht bei jedem Kunden gesetzt
     @OneToMany(mappedBy= "customer")
     List<Order> orders;

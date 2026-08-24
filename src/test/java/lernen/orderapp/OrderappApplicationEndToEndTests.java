@@ -60,9 +60,9 @@ class OrderappApplicationEndToEndTests {
                 "/api/batch-jobs/order-import/{executionId}", Map.class,1);
 
 
-        final var expected = Map.of(
+        final Map<String,Object> expected = Map.of(
 
-            "exitCode", "COMPLETED",
+                "exitCode", "COMPLETED",
                 "exitDescription", "",
                 //"exitException", null,
                 "running", false
@@ -76,7 +76,7 @@ class OrderappApplicationEndToEndTests {
     }
     @Test
     void getOrdersTest()  {
-        final var  response = restTemplate.getForEntity(
+        final ResponseEntity<List>  response = restTemplate.getForEntity(
                 "/api/orders?customerId={customerId}&channel={channel}&dateFrom={dateFrom}&dateTo={dateTo}&sorting={sorting}", List.class,
                 "C-1001", "ONLINE", "2026-01-01", "2026-12-31", true
                 );
@@ -87,15 +87,25 @@ class OrderappApplicationEndToEndTests {
         assertThat(orders).hasSize(2);
         assertThat(orders).extracting(o -> o.get("orderId"))
                 .containsExactlyInAnyOrder("ORD-2001", "ORD-2016");
-        assertThat(orders).allSatisfy(o -> assertThat(o.get("channel")).isEqualTo("ONLINE"));
+        assertThat(orders).allSatisfy(o -> assertThat(o).containsEntry("channel", "ONLINE"));
     }
     @Test
+    void getOrdersNotFoundTest()  {
+        final ResponseEntity<Exception>  response = restTemplate.getForEntity(
+                "/api/orders?customerId={customerId}&channel={channel}&dateFrom={dateFrom}&dateTo={dateTo}&sorting={sorting}", Exception.class,
+                "xy", "ONLINE", "2026-01-01", "2026-12-31", true
+        );
+        System.out.println("response = " + response);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
     void getStatisticsTest()  {
-        final var  response = restTemplate.getForEntity(
+        final ResponseEntity<Map>  response = restTemplate.getForEntity(
                 "/api/customers/{customer_id}/statistics", Map.class,"C-1001");
         System.out.println("response = " + response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        final var  expected=Map.of( "Total Earnings",752.2, "number of Orders",5);
+        final Map<String, Object>  expected=Map.of( "Total Earnings",752.2, "number of Orders",5);
         assertThat(response.getBody()).containsAllEntriesOf(expected);
     }
     @Test
@@ -114,10 +124,6 @@ class OrderappApplicationEndToEndTests {
                 "Dieter Wolf");
         assertThat(response.getBody()).containsExactlyElementsOf( expected);
 
-    }
-
-    @Test
-    void contextLoads() {
     }
 
 }

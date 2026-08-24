@@ -8,12 +8,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 
-import java.time.format.DateTimeFormatter;
-
-
 @RestControllerAdvice
 public class ExceptionHandlerGlobal {
-    private final DateTimeFormatter df=DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
 
     @ExceptionHandler(CustomerNotFoundException.class)
     public Object ProblemDetail(CustomerNotFoundException e){
