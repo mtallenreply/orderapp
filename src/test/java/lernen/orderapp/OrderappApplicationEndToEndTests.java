@@ -42,7 +42,7 @@ class OrderappApplicationEndToEndTests {
         final ResponseEntity<String> response = prepareDB();
 
         log.info("response = {}", response);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isInstanceOf(String.class);
         assertThat(response.getBody()).isEqualTo("1");
 
@@ -66,7 +66,7 @@ class OrderappApplicationEndToEndTests {
         assertThat(response2.getBody()).containsAllEntriesOf(expected);
 
         log.info("response = {}", response);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isInstanceOf(String.class);
 
     }
@@ -74,14 +74,15 @@ class OrderappApplicationEndToEndTests {
     void getOrdersTest()  {
         final ResponseEntity<String> _ = prepareDB();
 
-        final ResponseEntity<List>  response = restTemplate.getForEntity(
-                "/api/orders?customerId={customerId}&channel={channel}&dateFrom={dateFrom}&dateTo={dateTo}&sorting={sorting}", List.class,
-                "C-1001", "ONLINE", "2026-01-01", "2026-12-31", true
+        final ResponseEntity<Map>  response = restTemplate.getForEntity(
+                "/api/orders?customerId={customerId}&channel={channel}&dateFrom={dateFrom}&dateTo={dateTo}",  Map.class,
+                "C-1001", "ONLINE", "2026-01-01", "2026-12-31"
                 );
         log.info("response = {}", response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        final List<Map<String, Object>> orders = response.getBody();
+        final List<Map<String, Object>> orders = (List<Map<String, Object>>) response.getBody().get("content");
+
         assertThat(orders).hasSize(2);
         assertThat(orders).extracting(o -> o.get("orderId"))
                 .containsExactlyInAnyOrder("ORD-3011", "ORD-3026");
@@ -92,8 +93,8 @@ class OrderappApplicationEndToEndTests {
         final ResponseEntity<String> _ = prepareDB();
 
         final ResponseEntity<Exception>  response = restTemplate.getForEntity(
-                "/api/orders?customerId={customerId}&channel={channel}&dateFrom={dateFrom}&dateTo={dateTo}&sorting={sorting}", Exception.class,
-                "xy", "ONLINE", "2026-01-01", "2026-12-31", true
+                "/api/orders?customerId={customerId}&channel={channel}&dateFrom={dateFrom}&dateTo={dateTo}", Exception.class,
+                "xy", "ONLINE", "2026-01-01", "2026-12-31"
         );
         log.info("response = {}", response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -107,7 +108,7 @@ class OrderappApplicationEndToEndTests {
                 "/api/customers/{customer_id}/statistics", Map.class,"C-1001");
         log.info("response = {}", response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        final Map<String, Object>  expected=Map.of( "Total Earnings",752.2, "number of Orders",5);
+        final Map<String, Object>  expected=Map.of( "Total Earnings",404.93, "number of Orders",4);
         assertThat(response.getBody()).containsAllEntriesOf(expected);
     }
     @Test

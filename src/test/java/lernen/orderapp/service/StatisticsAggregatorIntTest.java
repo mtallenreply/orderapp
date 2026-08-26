@@ -69,13 +69,13 @@ class StatisticsAggregatorIntTest {
     }
     @Test
     void testCalcTop() {
-        final List<String> result = statisticsAggregatorUnderTest.calcTop(
+        final List<StatisticsAggregator.TopCustomer> result = statisticsAggregatorUnderTest.calcTop(
                 LocalDate.parse("2025-01-01"),
                 LocalDate.parse("2026-12-31"),5L);
         log.info("result = {}", result);
-        // Erst der erste Lauf des ImportJobs verbindet namen mit nummern
-//        assertThat(result).containsExactly("C-1003", "C-1002", "C-1001", "C-1005", "C-1004");
-        assertThat(result).containsExactly("Clara Voss", "Bernd Klein", "Anna Berger", "Erika Sommer", "Dieter Wolf");
+
+        assertThat(result).extracting(StatisticsAggregator.TopCustomer::customerName)
+                .containsExactly("Clara Voss", "Bernd Klein", "Erika Sommer", "Anna Berger", "Dieter Wolf");
     }
 
 }

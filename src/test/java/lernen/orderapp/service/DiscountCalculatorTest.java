@@ -22,13 +22,10 @@ class DiscountCalculatorTest {
                 "customerName",
                 "productSku",
                 100,
-                new BigDecimal("10.0"),
+                new BigDecimal("10.00"),
                 "orderDate", "channel");
-        final Customer customer = new Customer();
-        customer.setId("customerId");
+        final Customer customer = new Customer("customerId", CustomerType.PREMIUM, new BigDecimal("15"));
         customer.setCustomerName("customerName");
-        customer.setCustomerType(CustomerType.PREMIUM);
-        customer.setLoyaltyDiscountPercent(new BigDecimal("15"));
         final Order order = new Order();
         customer.setOrders(List.of(order));
 
@@ -48,11 +45,8 @@ class DiscountCalculatorTest {
                 10,
                 new BigDecimal("10.0"),
                 "orderDate", "channel");
-        final Customer customer = new Customer();
-        customer.setId("customerId");
+        final Customer customer = new Customer("customerId", CustomerType.PREMIUM, new BigDecimal("15"));
         customer.setCustomerName("customerName");
-        customer.setCustomerType(CustomerType.PREMIUM);
-        customer.setLoyaltyDiscountPercent(new BigDecimal("15"));
         final Order order = new Order();
         customer.setOrders(List.of(order));
 
@@ -72,11 +66,8 @@ class DiscountCalculatorTest {
                 5,
                 new BigDecimal("10.0"),
                 "orderDate", Channel.PARTNER.toString());
-        final Customer customer = new Customer();
-        customer.setId("customerId");
+        final Customer customer = new Customer("customerId", CustomerType.PREMIUM, new BigDecimal("15"));
         customer.setCustomerName("customerName");
-        customer.setCustomerType(CustomerType.PREMIUM);
-        customer.setLoyaltyDiscountPercent(new BigDecimal("15"));
         final Order order = new Order();
         customer.setOrders(List.of(order));
 
