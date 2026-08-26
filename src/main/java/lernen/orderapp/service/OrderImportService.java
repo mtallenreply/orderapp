@@ -13,7 +13,7 @@ import java.nio.file.Path;
 
 @Service
 @RequiredArgsConstructor
-public class OrderImportService {
+public final class OrderImportService {
     private final JobOperator jobOperator;
     private final Job orderImportJob;
     private final JobRepository jobRepository;

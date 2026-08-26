@@ -1,6 +1,7 @@
 package lernen.orderapp.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,7 +15,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Customer {
+public  class Customer {
     @Id
     private String id;
     //das wird von den Beispieldaten nicht befüllt
@@ -25,8 +26,15 @@ public class Customer {
     @Column(nullable = false)
     private CustomerType customerType;
     @Column( updatable = false)
+    @Setter(AccessLevel.NONE)
     private BigDecimal loyaltyDiscountPercent;    //Individueller Treuerabatt in Prozent – nicht bei jedem Kunden gesetzt
     @OneToMany(mappedBy= "customer")
     private List<Order> orders;
+
+    public Customer(final String id, final CustomerType customerType, final BigDecimal loyaltyDiscountPercent) {
+        this.id = id;
+        this.customerType = customerType;
+        this.loyaltyDiscountPercent = loyaltyDiscountPercent;
+    }
 }
 

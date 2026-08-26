@@ -13,7 +13,7 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 @RequiredArgsConstructor
 @Service
-final public  class DiscountCalculator {
+public final class DiscountCalculator {
 
     private static final BigDecimal QUANTITY_DISCOUNT_10 = BigDecimal.valueOf(0.05);
     private static final BigDecimal QUANTITY_DISCOUNT_50 = BigDecimal.valueOf(0.10);

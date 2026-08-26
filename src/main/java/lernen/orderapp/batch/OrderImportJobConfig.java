@@ -38,7 +38,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Configuration
 
-public class OrderImportJobConfig {
+public  class OrderImportJobConfig {
     private final JobRepository jobRepository;
     private final OrderImportInputProcessor processor;
     @Bean

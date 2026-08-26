@@ -22,7 +22,7 @@ import java.nio.file.Path;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @Component
 @RequiredArgsConstructor
-public class SeedDataLoader implements CommandLineRunner {
+public final class SeedDataLoader implements CommandLineRunner {
     private final CustomerRepository customerRepository;
 
     @Override
@@ -33,13 +33,11 @@ public class SeedDataLoader implements CommandLineRunner {
                  final CSVParser parser = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).get().parse(in);
 
             for (final CSVRecord csvrecord : parser) {
-                final Customer customer = new Customer();
-                customer.setId(csvrecord.get("customerId"));
-                customer.setCustomerType(CustomerType.valueOf(csvrecord.get("customerType")));
                 final String loyalty = csvrecord.get("loyaltyDiscountPercent");
-                if (loyalty != null && !loyalty.isBlank()) {
-                    customer.setLoyaltyDiscountPercent(BigDecimal.valueOf(Double.parseDouble(loyalty)));
-                }
+                final BigDecimal loyaltyDiscountPercent = (loyalty != null && !loyalty.isBlank())
+                        ? BigDecimal.valueOf(Double.parseDouble(loyalty)) : null;
+                final Customer customer = new Customer(csvrecord.get("customerId"),
+                        CustomerType.valueOf(csvrecord.get("customerType")), loyaltyDiscountPercent);
                 customerRepository.save(customer);
 
             }

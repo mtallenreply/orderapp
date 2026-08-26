@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class StartupUrlLogger {
+public final class StartupUrlLogger {
 
     private final Environment environment;
 
