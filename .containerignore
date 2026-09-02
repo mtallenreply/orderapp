@@ -1,0 +1,7 @@
+.git
+.idea
+target
+log.log
+log.jsonl
+log.log.*.gz
+*.iml
