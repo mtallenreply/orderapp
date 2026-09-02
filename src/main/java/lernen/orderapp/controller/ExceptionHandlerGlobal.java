@@ -18,22 +18,25 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public final class ExceptionHandlerGlobal {
     @ExceptionHandler(ConstraintViolationException.class)
-    public Object ProblemDetail(final ConstraintViolationException e){
+    public Object ProblemDetail(final ConstraintViolationException e) {
         log.error("result = {}", e.getMessage());
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,e.getMessage());
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
+
     @ExceptionHandler(CustomerNotFoundException.class)
-    public Object ProblemDetail(final CustomerNotFoundException e){
+    public Object ProblemDetail(final CustomerNotFoundException e) {
         log.error("result = {}", e.getMessage());
-        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND,e.getMessage());
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
     }
+
     @ExceptionHandler(JobExecutionNotFoundException.class)
-    public Object ProblemDetail(final JobExecutionNotFoundException e){
+    public Object ProblemDetail(final JobExecutionNotFoundException e) {
         log.error("result = {}", e.getMessage());
-        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND,e.getMessage());
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
     }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Object ProblemDetail(final MethodArgumentNotValidException e){
+    public Object ProblemDetail(final MethodArgumentNotValidException e) {
         log.error("result = {}", e.getMessage());
         final Map<String, String> fieldErrors = e.getBindingResult().getFieldErrors().stream()
                 .collect(Collectors.toMap(FieldError::getField, fe -> fe.getDefaultMessage() == null ? "ungültig" : fe.getDefaultMessage(), (a, b) -> a));

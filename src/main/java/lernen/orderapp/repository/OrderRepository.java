@@ -18,24 +18,24 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     @Query("SELECT COALESCE(SUM(o.resultingPrice * o.quantity), 0) FROM Order o WHERE o.customer.id = :customerId")
     BigDecimal sumEarningsByCustomerId(@Param("customerId") String customerId);
 
-    List<Order> findByCustomer_IdAndOrderDateBetweenAndChannelOrderByOrderDateDesc( String id,  Date orderDateStart,  Date orderDateEnd,  Channel channel);
+    List<Order> findByCustomer_IdAndOrderDateBetweenAndChannelOrderByOrderDateDesc(String id, Date orderDateStart, Date orderDateEnd, Channel channel);
 
     List<Order> findByCustomer_IdAndOrderDateBetweenAndChannel(String id, Date orderDateStart, Date orderDateEnd, Channel channel);
 
     @Query(value = """
-        SELECT o FROM Order o
-        WHERE (:customerId IS NULL OR o.customer.id = :customerId)
-          AND (:channel IS NULL OR o.channel = :channel)
-          AND (:dateFrom IS NULL OR o.orderDate >= :dateFrom)
-          AND (:dateTo IS NULL OR o.orderDate <= :dateTo)
-        """,
+            SELECT o FROM Order o
+            WHERE (:customerId IS NULL OR o.customer.id = :customerId)
+              AND (:channel IS NULL OR o.channel = :channel)
+              AND (:dateFrom IS NULL OR o.orderDate >= :dateFrom)
+              AND (:dateTo IS NULL OR o.orderDate <= :dateTo)
+            """,
             countQuery = """
-        SELECT COUNT(o) FROM Order o
-        WHERE (:customerId IS NULL OR o.customer.id = :customerId)
-          AND (:channel IS NULL OR o.channel = :channel)
-          AND (:dateFrom IS NULL OR o.orderDate >= :dateFrom)
-          AND (:dateTo IS NULL OR o.orderDate <= :dateTo)
-        """)
+                    SELECT COUNT(o) FROM Order o
+                    WHERE (:customerId IS NULL OR o.customer.id = :customerId)
+                      AND (:channel IS NULL OR o.channel = :channel)
+                      AND (:dateFrom IS NULL OR o.orderDate >= :dateFrom)
+                      AND (:dateTo IS NULL OR o.orderDate <= :dateTo)
+                    """)
     Page<Order> findByFilters(@Param("customerId") String customerId,
 
                               @Param("dateFrom") Date dateFrom,

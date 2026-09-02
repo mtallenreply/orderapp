@@ -13,7 +13,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
         )
 )
 @SpringBootApplication
-public final  class OrderappApplication {
+public final class OrderappApplication {
 
     static void main(final String[] args) {
         SpringApplication.run(OrderappApplication.class, args);

@@ -38,9 +38,10 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Configuration
 
-public  class OrderImportJobConfig {
+public class OrderImportJobConfig {
     private final JobRepository jobRepository;
     private final OrderImportInputProcessor processor;
+
     @Bean
     @StepScope
     public FlatFileItemReader<OrderImportZeile> orderReader(@Value("#{jobParameters['inputFile']}") final String inputFile) {
@@ -51,10 +52,10 @@ public  class OrderImportJobConfig {
                 .linesToSkip(1)
                 .delimited()
                 .delimiter(",")
-                .names("orderId", "customerId", "customerName","productSku","quantity","unitPrice","orderDate","channel")
+                .names("orderId", "customerId", "customerName", "productSku", "quantity", "unitPrice", "orderDate", "channel")
                 .targetType(OrderImportZeile.class)
                 .build();
-}
+    }
 
     @Bean
     public RepositoryItemWriter<Order> orderWriter(final OrderRepository orderRepository) {
@@ -63,12 +64,14 @@ public  class OrderImportJobConfig {
                 .methodName("save")
                 .build();
     }
+
     @Bean
     public TaskExecutor taskExecutor() {
-        final SimpleAsyncTaskExecutor executor= new SimpleAsyncTaskExecutor("orderImport-");
+        final SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor("orderImport-");
         executor.setConcurrencyLimit(4);// ohne eventuell zu viele Threads
         return executor;
     }
+
     @Bean
     public SkipListener<OrderImportZeile, Order> skipListener() {
         return new SkipListener<>() {
@@ -88,25 +91,27 @@ public  class OrderImportJobConfig {
             }
         };
     }
+
     @Bean
     public JobExecutionListener tempFileCleanUpListener() {
-       return new JobExecutionListener() {
-           @Override
-           public void afterJob(@NonNull final JobExecution jobExecution){
-               final String inputFile = jobExecution.getJobParameters().getString("inputFile");
-               try {
-                   Files.deleteIfExists(Path.of(Objects.requireNonNull(inputFile)));
-               } catch (final IOException e) {
-                   log.warn("Konnte Temp-Datei nicht löschen: {}", inputFile, e);
-               }
+        return new JobExecutionListener() {
+            @Override
+            public void afterJob(@NonNull final JobExecution jobExecution) {
+                final String inputFile = jobExecution.getJobParameters().getString("inputFile");
+                try {
+                    Files.deleteIfExists(Path.of(Objects.requireNonNull(inputFile)));
+                } catch (final IOException e) {
+                    log.warn("Konnte Temp-Datei nicht löschen: {}", inputFile, e);
+                }
 
-           }
-       };
+            }
+        };
     }
+
     @Bean
     public Step importStep(final FlatFileItemReader<OrderImportZeile> orderReader,
                            final RepositoryItemWriter<Order> orderWriter,
-                           final SkipListener<OrderImportZeile, Order> skipListener){
+                           final SkipListener<OrderImportZeile, Order> skipListener) {
 
         return new StepBuilder("importStep", jobRepository)
                 .<OrderImportZeile, Order>chunk(1)// definiert commit Größe hier gerade ineffizient
@@ -121,6 +126,7 @@ public  class OrderImportJobConfig {
                 .skipLimit(5).listener(skipListener)// oder hiermit wertvoll
                 .build();
     }
+
     @Bean
     public Job orderImportJob(final Step importStep) {
         return new JobBuilder("ImportJob", jobRepository)

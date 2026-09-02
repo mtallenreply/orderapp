@@ -15,7 +15,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public  class Customer {
+public class Customer {
     @Id
     private String id;
     //das wird von den Beispieldaten nicht befüllt
@@ -25,10 +25,10 @@ public  class Customer {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CustomerType customerType;
-    @Column( updatable = false)
+    @Column(updatable = false)
     @Setter(AccessLevel.NONE)
     private BigDecimal loyaltyDiscountPercent;    //Individueller Treuerabatt in Prozent – nicht bei jedem Kunden gesetzt
-    @OneToMany(mappedBy= "customer")
+    @OneToMany(mappedBy = "customer")
     private List<Order> orders;
 
     public Customer(final String id, final CustomerType customerType, final BigDecimal loyaltyDiscountPercent) {
@@ -37,4 +37,3 @@ public  class Customer {
         this.loyaltyDiscountPercent = loyaltyDiscountPercent;
     }
 }
-

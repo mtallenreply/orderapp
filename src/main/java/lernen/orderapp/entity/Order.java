@@ -1,13 +1,12 @@
 package lernen.orderapp.entity;
 
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.sql.Date;
-
-import jakarta.persistence.*;
 
 @Entity
 @Table(name = "orders")
@@ -32,8 +31,7 @@ public class Order {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, updatable = false)
     private Channel channel;
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn
     private Customer customer;
 }
-

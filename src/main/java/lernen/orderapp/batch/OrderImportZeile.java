@@ -9,6 +9,5 @@ public record OrderImportZeile(String orderId,
                                Integer quantity,
                                BigDecimal unitPrice,
                                String orderDate,
-                               String channel)
- {
+                               String channel) {
 }

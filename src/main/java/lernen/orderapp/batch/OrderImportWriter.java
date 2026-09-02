@@ -6,13 +6,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.batch.infrastructure.item.Chunk;
 import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.stereotype.Component;
+
 // Erster Versuch bevor ich gemerkt habe, dass es schon etwas gibt
 @Component
 @RequiredArgsConstructor
 public final class OrderImportWriter implements ItemWriter<Order> {
     private final OrderRepository orderRepository;
+
     @Override
-    public void write(final Chunk<? extends Order> chunk)   {
+    public void write(final Chunk<? extends Order> chunk) {
         for (final Order order : chunk) {
             orderRepository.save(order);
         }
