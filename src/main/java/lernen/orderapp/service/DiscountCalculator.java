@@ -10,6 +10,7 @@ import java.math.RoundingMode;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
+
 @RequiredArgsConstructor
 @Service
 public final class DiscountCalculator {
@@ -21,17 +22,17 @@ public final class DiscountCalculator {
 
     private static final IntPredicate lowerDiscountBorder = qty -> qty >= 10;
     private static final IntPredicate upperDiscountBorder = qty -> qty >= 50;
-    private static final Function<Integer,BigDecimal> quantityDiscountCalc=(quantity)
+    private static final Function<Integer, BigDecimal> quantityDiscountCalc = (quantity)
             ->
             upperDiscountBorder.test(quantity) ? QUANTITY_DISCOUNT_50
                     : lowerDiscountBorder.test(quantity) ? QUANTITY_DISCOUNT_10
                     : BigDecimal.ZERO;
 
-    private static final Function<String,BigDecimal> channelDiscountCalc= (channel)
+    private static final Function<String, BigDecimal> channelDiscountCalc = (channel)
             -> channel.equals(Channel.PARTNER.toString()) ? PARTNER_DISCOUNT : BigDecimal.ZERO;
 
-    private static final Function<Customer,BigDecimal> loyaltyDiscountCalc= (customer)
-            -> Optional.ofNullable(customer.getLoyaltyDiscountPercent()).orElse(BigDecimal.ZERO).divide(BigDecimal.valueOf(100) ,4, RoundingMode.HALF_UP);
+    private static final Function<Customer, BigDecimal> loyaltyDiscountCalc = (customer)
+            -> Optional.ofNullable(customer.getLoyaltyDiscountPercent()).orElse(BigDecimal.ZERO).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
 
     public static BigDecimal calculateDiscount(final Integer quantity, final String channel, final Customer customer) {
         final BigDecimal quantityDiscount = quantityDiscountCalc.apply(quantity);
@@ -39,5 +40,5 @@ public final class DiscountCalculator {
         final BigDecimal loyaltyDiscount = loyaltyDiscountCalc.apply(customer);
         final BigDecimal totalDiscount = quantityDiscount.add(channelDiscount).add(loyaltyDiscount);
         return totalDiscount.min(MAX_DISCOUNT);
-}
+    }
 }

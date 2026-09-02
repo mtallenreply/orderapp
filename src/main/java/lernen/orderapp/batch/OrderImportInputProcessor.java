@@ -1,4 +1,3 @@
-
 package lernen.orderapp.batch;
 
 import lernen.orderapp.entity.Channel;
@@ -22,7 +21,7 @@ public final class OrderImportInputProcessor implements ItemProcessor<OrderImpor
     private final CustomerRepository customerRepository;
 
     @Override
-    public  Order process(final OrderImportZeile orderImportZeile) {
+    public Order process(final OrderImportZeile orderImportZeile) {
         Customer customer;
         try {
             customer = customerRepository.findById(orderImportZeile.customerId()).orElse(null);
@@ -35,7 +34,7 @@ public final class OrderImportInputProcessor implements ItemProcessor<OrderImpor
             }
         } catch (final DataIntegrityViolationException e) {
             // ein anderer Thread war schneller und hat den Kunden bereits angelegt
-             customer = customerRepository.findById(orderImportZeile.customerId())
+            customer = customerRepository.findById(orderImportZeile.customerId())
                     .orElseThrow(() -> e);
         }
         if (!orderImportZeile.customerName().equals(customer.getCustomerName())) {
