@@ -11,12 +11,13 @@ import org.apache.commons.csv.CSVRecord;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -29,7 +30,7 @@ public final class SeedDataLoader implements CommandLineRunner {
     public void run(final String... args) {
 
 
-        try (final Reader in = Files.newBufferedReader(Path.of("src/main/resources/beispiel-kunden.csv"))) {
+        try (final Reader in = new InputStreamReader(new ClassPathResource("beispiel-kunden.csv").getInputStream(), StandardCharsets.UTF_8)) {
             final CSVParser parser = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).get().parse(in);
 
             for (final CSVRecord csvrecord : parser) {
