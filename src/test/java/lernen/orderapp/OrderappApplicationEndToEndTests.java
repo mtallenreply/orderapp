@@ -122,12 +122,13 @@ class OrderappApplicationEndToEndTests {
         log.info("response = {}", response);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        final  List<String> expected= List.of( "Clara Voss",
+        final List<String> expected = List.of("Clara Voss",
                 "Bernd Klein",
-                "Anna Berger",// Hier Problem mit den Doppelten Buchungen OrderId ist gleich
                 "Erika Sommer",
+                "Anna Berger",
                 "Dieter Wolf");
-        assertThat(response.getBody()).containsExactlyElementsOf( expected);
+        assertThat(response.getBody()).extracting(c -> ((Map<String, Object>) c).get("customerName"))
+                .containsExactlyElementsOf(expected);
 
     }
 
