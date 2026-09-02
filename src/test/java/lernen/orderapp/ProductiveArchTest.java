@@ -11,7 +11,7 @@ import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
 @AnalyzeClasses(packages = "lernen.orderapp", importOptions = ImportOption.DoNotIncludeTests.class)
-final class ArchitectureTest {
+final class ProductiveArchTest {
 
     @ArchTest
     static final ArchRule schichtenGrenzenWerdenEingehalten = layeredArchitecture()
@@ -47,4 +47,12 @@ final class ArchitectureTest {
     static final ArchRule keineZyklenZwischenPaketen = slices()
             .matching("lernen.orderapp.(*)..")
             .should().beFreeOfCycles();
+
+    @ArchTest
+    static final ArchRule exceptionNamingConvention = classes()
+            .that().areAssignableTo(Exception.class)
+            .should().haveSimpleNameEndingWith("Exception")
+            .as("Exception-Klassen sollen auf 'Exception' enden")
+            .because("konsistente Benennung macht Fehlerklassen im Code sofort erkennbar");
+
 }

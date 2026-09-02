@@ -12,7 +12,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DiscountCalculatorTest {
+class DiscountCalculatorUnitTest {
 
     @Test
     void testCalculateDiscount() {
@@ -35,6 +35,7 @@ class DiscountCalculatorTest {
         // Verify the results
         assertThat(result).isEqualTo(new BigDecimal("0.2"));
     }
+
     @Test
     void testCalculateDiscount2() {
         // Setup
@@ -56,6 +57,7 @@ class DiscountCalculatorTest {
         // Verify the results
         assertThat(result).isEqualTo(new BigDecimal("0.2000"));
     }
+
     @Test
     void testCalculateDiscount3() {
         // Setup

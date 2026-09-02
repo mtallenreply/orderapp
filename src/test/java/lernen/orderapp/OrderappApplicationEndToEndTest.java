@@ -15,30 +15,33 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
-class OrderappApplicationEndToEndTests {
+class OrderappApplicationEndToEndTest {
 
     @Autowired
     final TestRestTemplate restTemplate;
+
     @Autowired
-    OrderappApplicationEndToEndTests( final TestRestTemplate restTemplate) {
+    OrderappApplicationEndToEndTest(final TestRestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
-    ResponseEntity<String> prepareDB(){
+
+    ResponseEntity<String> prepareDB() {
         final MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("file", new ClassPathResource("test-bestellungen.csv"));
-        final  HttpHeaders headers = new HttpHeaders();
+        final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        final  HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+        final HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
         return restTemplate.postForEntity(
                 "/api/batch-jobs/order-import", requestEntity, String.class);
     }
 
     @Test
-    void postOrderImportTest()  {
+    void postOrderImportTest() {
         final ResponseEntity<String> response = prepareDB();
 
         log.info("response = {}", response);
@@ -47,16 +50,17 @@ class OrderappApplicationEndToEndTests {
         assertThat(response.getBody()).isEqualTo("1");
 
     }
+
     @Test
-    void getOrderImportwithStatusTest()  {
+    void getOrderImportwithStatusTest() {
         final ResponseEntity<String> response = prepareDB();
 
 
-        final ResponseEntity<Map>  response2 = restTemplate.getForEntity(
-                "/api/batch-jobs/order-import/{executionId}", Map.class,1);
+        final ResponseEntity<Map> response2 = restTemplate.getForEntity(
+                "/api/batch-jobs/order-import/{executionId}", Map.class, 1);
 
 
-        final Map<String,Object> expected = Map.of(
+        final Map<String, Object> expected = Map.of(
 
                 "exitCode", "COMPLETED",
                 "exitDescription", "",
@@ -70,14 +74,15 @@ class OrderappApplicationEndToEndTests {
         assertThat(response.getBody()).isInstanceOf(String.class);
 
     }
+
     @Test
-    void getOrdersTest()  {
+    void getOrdersTest() {
         final ResponseEntity<String> _ = prepareDB();
 
-        final ResponseEntity<Map>  response = restTemplate.getForEntity(
-                "/api/orders?customerId={customerId}&channel={channel}&dateFrom={dateFrom}&dateTo={dateTo}",  Map.class,
+        final ResponseEntity<Map> response = restTemplate.getForEntity(
+                "/api/orders?customerId={customerId}&channel={channel}&dateFrom={dateFrom}&dateTo={dateTo}", Map.class,
                 "C-1001", "ONLINE", "2026-01-01", "2026-12-31"
-                );
+        );
         log.info("response = {}", response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -88,11 +93,12 @@ class OrderappApplicationEndToEndTests {
                 .containsExactlyInAnyOrder("ORD-3011", "ORD-3026");
         assertThat(orders).allSatisfy(o -> assertThat(o).containsEntry("channel", "ONLINE"));
     }
+
     @Test
-    void getOrdersNotFoundTest()  {
+    void getOrdersNotFoundTest() {
         final ResponseEntity<String> _ = prepareDB();
 
-        final ResponseEntity<Exception>  response = restTemplate.getForEntity(
+        final ResponseEntity<Exception> response = restTemplate.getForEntity(
                 "/api/orders?customerId={customerId}&channel={channel}&dateFrom={dateFrom}&dateTo={dateTo}", Exception.class,
                 "xy", "ONLINE", "2026-01-01", "2026-12-31"
         );
@@ -101,18 +107,19 @@ class OrderappApplicationEndToEndTests {
     }
 
     @Test
-    void getStatisticsTest()  {
+    void getStatisticsTest() {
         final ResponseEntity<String> _ = prepareDB();
 
-        final ResponseEntity<Map>  response = restTemplate.getForEntity(
-                "/api/customers/{customer_id}/statistics", Map.class,"C-1001");
+        final ResponseEntity<Map> response = restTemplate.getForEntity(
+                "/api/customers/{customer_id}/statistics", Map.class, "C-1001");
         log.info("response = {}", response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        final Map<String, Object>  expected=Map.of( "Total Earnings",404.93, "number of Orders",4);
+        final Map<String, Object> expected = Map.of("Total Earnings", 404.93, "number of Orders", 4);
         assertThat(response.getBody()).containsAllEntriesOf(expected);
     }
+
     @Test
-    void getTopCustomersTest()  {
+    void getTopCustomersTest() {
         final ResponseEntity<String> _ = prepareDB();
 
         final ResponseEntity<List> response = restTemplate.getForEntity(
