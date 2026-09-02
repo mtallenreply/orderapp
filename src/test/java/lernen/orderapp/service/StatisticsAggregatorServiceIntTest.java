@@ -30,11 +30,11 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @Slf4j
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureTestRestTemplate
-class StatisticsAggregatorIntTest {
+class StatisticsAggregatorServiceIntTest {
 
 
     @Autowired
-    private StatisticsAggregator statisticsAggregatorUnderTest;
+    private StatisticsAggregatorService statisticsAggregatorServiceUnderTest;
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -52,7 +52,7 @@ class StatisticsAggregatorIntTest {
 
     @Test
     void testCalcNumberOfOrdersPerChannel() {
-        final Map<Channel, Long> result = statisticsAggregatorUnderTest.calcNumberOfOrdersPerChannel();
+        final Map<Channel, Long> result = statisticsAggregatorServiceUnderTest.calcNumberOfOrdersPerChannel();
         log.info("result = {}", result);
 
         assertThat(result).isEqualTo(Map.of(
@@ -65,19 +65,19 @@ class StatisticsAggregatorIntTest {
 
     @Test
     void testCalcTotalEarnings() {
-        final BigDecimal result = statisticsAggregatorUnderTest.calcTotalEarnings();
+        final BigDecimal result = statisticsAggregatorServiceUnderTest.calcTotalEarnings();
         log.info("result = {}", result);
         assertThat(result).isEqualTo(new BigDecimal("3674.85"));
     }
 
     @Test
     void testCalcTop() {
-        final List<StatisticsAggregator.TopCustomer> result = statisticsAggregatorUnderTest.calcTop(
+        final List<StatisticsAggregatorService.TopCustomer> result = statisticsAggregatorServiceUnderTest.calcTop(
                 LocalDate.parse("2025-01-01"),
                 LocalDate.parse("2026-12-31"), 5L);
         log.info("result = {}", result);
 
-        assertThat(result).extracting(StatisticsAggregator.TopCustomer::customerName)
+        assertThat(result).extracting(StatisticsAggregatorService.TopCustomer::customerName)
                 .contains("Clara Voss", "Bernd Klein", "Erika Sommer", "Anna Berger", "Dieter Wolf");
     }
 

@@ -6,7 +6,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lernen.orderapp.entity.Order;
 import lernen.orderapp.service.OrderImportService;
-import lernen.orderapp.service.StatisticsAggregator;
+import lernen.orderapp.service.StatisticsAggregatorService;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.batch.core.ExitStatus;
@@ -38,7 +38,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class RestAPI {
     private final OrderImportService orderImportService;
-    private final StatisticsAggregator statisticsAggregator;
+    private final StatisticsAggregatorService statisticsAggregatorService;
 
     @Operation(summary = "Startet einen CSV Orderverarbeitungsjob", description = "Startet einen CSV Orderverarbeitungsjob")
 
@@ -53,16 +53,18 @@ public class RestAPI {
         return ResponseEntity.created(URI.create("/api/batch-jobs/order-import/" + executionId))
                 .body(executionId);
     }
+
     @Operation(summary = "Execution Job Ergebnis abfragen", description = "liefert eine Map mit Ergebnissen")
     @GetMapping("/api/batch-jobs/order-import/{executionId}")
-    public  ResponseEntity<ExitStatus> getOrderImport( @PathVariable("executionId")  final Long executionId){
+    public ResponseEntity<ExitStatus> getOrderImport(@PathVariable("executionId") final Long executionId) {
 
-        return ResponseEntity.ok( orderImportService.getOrderImportStatus(executionId));
+        return ResponseEntity.ok(orderImportService.getOrderImportStatus(executionId));
     }
+
     @Operation(summary = "Bestellungen abfragen", description = "Filtert Bestellungen nach Kunde, Kanal und Zeitraum, optional sortiert nach Datum.")
     @GetMapping("/api/orders")
-    public ResponseEntity<Page<DTO.OrderResponse>> getOrders(@Valid @ParameterObject final DTO.OrderRequest request, final Pageable pageable){
-        final Page<Order> orderPage = statisticsAggregator.getOrders(
+    public ResponseEntity<Page<DTO.OrderResponse>> getOrders(@Valid @ParameterObject final DTO.OrderRequest request, final Pageable pageable) {
+        final Page<Order> orderPage = statisticsAggregatorService.getOrders(
                 request.customerId(), request.channel(), request.dateFrom(), request.dateTo(), pageable);
         final Page<DTO.OrderResponse> response = orderPage.map(DTO.OrderResponse::from);
         return ResponseEntity.ok(response);
@@ -70,16 +72,17 @@ public class RestAPI {
 
     @Operation(summary = "liefert Statistiken", description = "liefert Kundenstatistiken")
     @GetMapping("/api/customers/{customerId}/statistics")
-    public ResponseEntity<Map<String, Object>> getStatistics(@PathVariable("customerId") @NotBlank  final String customerId){
-        return  ResponseEntity.ok(statisticsAggregator.getStatisticsOfCustomer(customerId));
+    public ResponseEntity<Map<String, Object>> getStatistics(@PathVariable("customerId") @NotBlank final String customerId) {
+        return ResponseEntity.ok(statisticsAggregatorService.getStatisticsOfCustomer(customerId));
     }
+
     @Operation(summary = "Liefert die besten Kunden", description = "Liefert die besten Kunden")
     @GetMapping("/api/statistics/top-customers")
 
-    public ResponseEntity<List<StatisticsAggregator.TopCustomer>> getTopCustomers(@Parameter(description = "Maximale Anzahl zurückgegebener Kunden") @RequestParam("limit") final Long limit,
-                                                                                  @Parameter(description = "Start des Auswertungszeitraums (yyyy-MM-dd)") @RequestParam("dateFrom") final LocalDate dateFrom,
-                                                                                  @Parameter(description = "Ende des Auswertungszeitraums (yyyy-MM-dd)") @RequestParam("dateTo") final LocalDate dateTo){
-        return ResponseEntity.ok(statisticsAggregator.calcTop(dateFrom,dateTo,limit));
+    public ResponseEntity<List<StatisticsAggregatorService.TopCustomer>> getTopCustomers(@Parameter(description = "Maximale Anzahl zurückgegebener Kunden") @RequestParam("limit") final Long limit,
+                                                                                         @Parameter(description = "Start des Auswertungszeitraums (yyyy-MM-dd)") @RequestParam("dateFrom") final LocalDate dateFrom,
+                                                                                         @Parameter(description = "Ende des Auswertungszeitraums (yyyy-MM-dd)") @RequestParam("dateTo") final LocalDate dateTo) {
+        return ResponseEntity.ok(statisticsAggregatorService.calcTop(dateFrom, dateTo, limit));
     }
 
 }

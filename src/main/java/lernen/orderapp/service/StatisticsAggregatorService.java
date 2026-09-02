@@ -14,23 +14,18 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class StatisticsAggregator {
+public class StatisticsAggregatorService {
+    private static final Function<Order, BigDecimal> earningsCalc
+            = order -> order.getResultingPrice().multiply(BigDecimal.valueOf(order.getQuantity()));
     private final CustomerRepository customerRepository;
     private final OrderRepository orderRepository;
-
-    private final Function<Order, BigDecimal> earningsCalc
-            = order -> order.getResultingPrice().multiply(BigDecimal.valueOf(order.getQuantity()));
 
     public Page<Order> getOrders(final String customerId, final Channel channel, final LocalDate dateFrom, final LocalDate dateTo, final Pageable pageable) {
         if (customerId != null) {
@@ -61,59 +56,40 @@ public class StatisticsAggregator {
 
     @Transactional
     public List<TopCustomer> calcTop(final LocalDate from, final LocalDate to, final Long limit) {
+
+        final Comparator<Map.Entry<String, BigDecimal>> byEarningsDescending = Map.Entry.<String, BigDecimal>comparingByValue().reversed();
+        // HilfsBedingung um nach Zeit zu filtern
+        final Predicate<Order> filterTime = order ->
+                !order.getOrderDate().before(Date.valueOf(from))
+                        && !order.getOrderDate().after(Date.valueOf(to));
+
+        // Hilfsfunktion um Customer Name als Bezeichnung in die Liste zu bekommen
+        final Function<Map.Entry<String, BigDecimal>, TopCustomer> mapToTopCustomer = entry -> {
+            final String customerName = customerRepository.findById(entry.getKey())
+                    .flatMap(c -> Optional.ofNullable(c.getCustomerName()))
+                    .orElse(entry.getKey());
+            return new TopCustomer(entry.getKey(), customerName, entry.getValue());
+        };
+
+        //1. Hole alle Orders
         final List<Order> orderList = orderRepository.findAll();
-
-        final Predicate<Order> filterTime = order -> !order.getOrderDate().before(Date.valueOf(from))
-                && !order.getOrderDate().after(Date.valueOf(to));
-
+        //2. Filtere alle Daten nach Von bis
         final List<Order> filteredOrders = orderList.stream()
                 .filter(filterTime)
                 .toList();
 
+        //3. Groupiere und summiere nach Customer ID
         final Map<String, BigDecimal> earningsByCustomerId = filteredOrders.stream()
                 .collect(Collectors.groupingBy(order -> order.getCustomer().getId(),
                         Collectors.reducing(BigDecimal.ZERO, earningsCalc, BigDecimal::add)));
-
+        // sorted() muss alle Kunden durchlaufen (stateful) - limit() kürzt erst danach.
+        // Der DB-Aufruf in mapToTopCustomer läuft aber nur noch für die verbleibenden `limit` Kunden.
         return earningsByCustomerId.entrySet().stream()
-                .sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
+                .sorted(byEarningsDescending)
                 .limit(limit)
-                .map(entry -> new TopCustomer(
-                        entry.getKey(),
-                        customerRepository.findById(entry.getKey())
-                                .flatMap(c -> Optional.ofNullable(c.getCustomerName()))
-                                .orElse(entry.getKey()),
-                        entry.getValue()))
+                .map(mapToTopCustomer)
                 .toList();
-    }
 
-    private List<TopCustomer> calcTopImperative(final LocalDate from, final LocalDate to, final Long limit) {
-        final List<Order> orderList = orderRepository.findAll();
-
-        final Map<String, BigDecimal> earningsByCustomerId = new HashMap<>();
-        for (final Order order : orderList) {
-            final boolean inRange = !order.getOrderDate().before(Date.valueOf(from))
-                    && !order.getOrderDate().after(Date.valueOf(to));
-            if (!inRange) {
-                continue;
-            }
-            final String customerId = order.getCustomer().getId();
-            earningsByCustomerId.merge(customerId, earningsCalc.apply(order), BigDecimal::add);
-        }
-
-        final List<Map.Entry<String, BigDecimal>> sortedEntries = new ArrayList<>(earningsByCustomerId.entrySet());
-        sortedEntries.sort(Map.Entry.<String, BigDecimal>comparingByValue().reversed());
-
-        final List<TopCustomer> result = new ArrayList<>();
-        for (final Map.Entry<String, BigDecimal> entry : sortedEntries) {
-            if (result.size() >= limit) {
-                break;
-            }
-            final String customerName = customerRepository.findById(entry.getKey())
-                    .flatMap(c -> Optional.ofNullable(c.getCustomerName()))
-                    .orElse(entry.getKey());
-            result.add(new TopCustomer(entry.getKey(), customerName, entry.getValue()));
-        }
-        return result;
     }
 
     public BigDecimal calcTotalEarnings() {

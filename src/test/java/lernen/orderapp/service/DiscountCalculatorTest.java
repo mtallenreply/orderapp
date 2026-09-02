@@ -30,7 +30,7 @@ class DiscountCalculatorTest {
         customer.setOrders(List.of(order));
 
         // Run the test
-        final BigDecimal result = DiscountCalculator.calculateDiscount(orderImportZeile, customer);
+        final BigDecimal result = DiscountCalculator.calculateDiscount(orderImportZeile.quantity(), orderImportZeile.channel(), customer);
 
         // Verify the results
         assertThat(result).isEqualTo(new BigDecimal("0.2"));
@@ -51,7 +51,7 @@ class DiscountCalculatorTest {
         customer.setOrders(List.of(order));
 
         // Run the test
-        final BigDecimal result = DiscountCalculator.calculateDiscount(orderImportZeile, customer);
+        final BigDecimal result = DiscountCalculator.calculateDiscount(orderImportZeile.quantity(), orderImportZeile.channel(), customer);
 
         // Verify the results
         assertThat(result).isEqualTo(new BigDecimal("0.2000"));
@@ -72,7 +72,7 @@ class DiscountCalculatorTest {
         customer.setOrders(List.of(order));
 
         // Run the test
-        final BigDecimal result = DiscountCalculator.calculateDiscount(orderImportZeile, customer);
+        final BigDecimal result = DiscountCalculator.calculateDiscount(orderImportZeile.quantity(), orderImportZeile.channel(), customer);
 
         // Verify the results
         assertThat(result).isEqualTo(new BigDecimal("0.1800"));

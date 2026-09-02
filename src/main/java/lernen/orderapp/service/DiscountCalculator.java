@@ -1,6 +1,5 @@
 package lernen.orderapp.service;
 
-import lernen.orderapp.batch.OrderImportZeile;
 import lernen.orderapp.entity.Channel;
 import lernen.orderapp.entity.Customer;
 import lombok.RequiredArgsConstructor;
@@ -22,21 +21,21 @@ public final class DiscountCalculator {
 
     private static final IntPredicate lowerDiscountBorder = qty -> qty >= 10;
     private static final IntPredicate upperDiscountBorder = qty -> qty >= 50;
-    private static final Function<OrderImportZeile,BigDecimal> quantityDiscountCalc=(a)
+    private static final Function<Integer,BigDecimal> quantityDiscountCalc=(quantity)
             ->
-            upperDiscountBorder.test(a.quantity()) ? QUANTITY_DISCOUNT_50
-                    : lowerDiscountBorder.test(a.quantity()) ? QUANTITY_DISCOUNT_10
+            upperDiscountBorder.test(quantity) ? QUANTITY_DISCOUNT_50
+                    : lowerDiscountBorder.test(quantity) ? QUANTITY_DISCOUNT_10
                     : BigDecimal.ZERO;
 
-    private static final Function<OrderImportZeile,BigDecimal> channelDiscountCalc= (line)
-            -> line.channel().equals(Channel.PARTNER.toString()) ? PARTNER_DISCOUNT : BigDecimal.ZERO;
+    private static final Function<String,BigDecimal> channelDiscountCalc= (channel)
+            -> channel.equals(Channel.PARTNER.toString()) ? PARTNER_DISCOUNT : BigDecimal.ZERO;
 
     private static final Function<Customer,BigDecimal> loyaltyDiscountCalc= (customer)
             -> Optional.ofNullable(customer.getLoyaltyDiscountPercent()).orElse(BigDecimal.ZERO).divide(BigDecimal.valueOf(100) ,4, RoundingMode.HALF_UP);
 
-    public static BigDecimal calculateDiscount(final OrderImportZeile orderImportZeile,final Customer customer) {
-        final BigDecimal quantityDiscount = quantityDiscountCalc.apply(orderImportZeile);
-        final BigDecimal channelDiscount = channelDiscountCalc.apply(orderImportZeile);
+    public static BigDecimal calculateDiscount(final Integer quantity, final String channel, final Customer customer) {
+        final BigDecimal quantityDiscount = quantityDiscountCalc.apply(quantity);
+        final BigDecimal channelDiscount = channelDiscountCalc.apply(channel);
         final BigDecimal loyaltyDiscount = loyaltyDiscountCalc.apply(customer);
         final BigDecimal totalDiscount = quantityDiscount.add(channelDiscount).add(loyaltyDiscount);
         return totalDiscount.min(MAX_DISCOUNT);

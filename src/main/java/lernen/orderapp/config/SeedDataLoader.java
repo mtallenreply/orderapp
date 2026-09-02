@@ -26,11 +26,11 @@ public final class SeedDataLoader implements CommandLineRunner {
     private final CustomerRepository customerRepository;
 
     @Override
-    public void run(final String... args)  {
+    public void run(final String... args) {
 
 
-        try (final Reader in = Files.newBufferedReader(Path.of("src/main/resources/beispiel-kunden.csv"))){
-                 final CSVParser parser = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).get().parse(in);
+        try (final Reader in = Files.newBufferedReader(Path.of("src/main/resources/beispiel-kunden.csv"))) {
+            final CSVParser parser = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).get().parse(in);
 
             for (final CSVRecord csvrecord : parser) {
                 final String loyalty = csvrecord.get("loyaltyDiscountPercent");
@@ -41,27 +41,9 @@ public final class SeedDataLoader implements CommandLineRunner {
                 customerRepository.save(customer);
 
             }
-            //final List<String> result=Files.readAllLines(Path.of("src/main/resources/beispiel-kunden.csv"));
-//            for (String element:result.subList(1,result.size())) {
-//                final String[] data=element.trim().split(",");
-//                final Customer customer = new Customer();
-//
-//                customer.setCustomerId(data[0]);
-//                customer.setCustomerType(CustomerType.valueOf(data[1]));
-//                customer.setLoyaltyDiscountPercent(BigDecimal.valueOf( Double.parseDouble(data[2])));
-//                final Customer savedCustomer =customerRepository.save(customer);
-//                System.out.println("result = " + savedCustomer);
-//            }
 
-        }
-        catch (final Exception e)
-        {
+        } catch (final Exception e) {
             log.error("result = {}", e.getMessage());
         }
     }
 }
-
-
-
-
-

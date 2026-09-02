@@ -51,7 +51,7 @@ public final class OrderImportInputProcessor implements ItemProcessor<OrderImpor
         newOrder.setQuantity(orderImportZeile.quantity());
         newOrder.setUnitPrice(orderImportZeile.unitPrice());
         newOrder.setChannel(Channel.valueOf(orderImportZeile.channel()));
-        final BigDecimal discount = DiscountCalculator.calculateDiscount(orderImportZeile, customer);
+        final BigDecimal discount = DiscountCalculator.calculateDiscount(orderImportZeile.quantity(), orderImportZeile.channel(), customer);
         newOrder.setDiscountFactor(discount);
         newOrder.setResultingPrice(orderImportZeile.unitPrice().multiply(BigDecimal.ONE.subtract(discount)));
         return newOrder;
