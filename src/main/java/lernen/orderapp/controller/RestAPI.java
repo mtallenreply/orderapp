@@ -1,5 +1,6 @@
 package lernen.orderapp.controller;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
@@ -21,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,6 +54,12 @@ public class RestAPI {
         final Long executionId = orderImportService.fileImport(tempFile);
         return ResponseEntity.created(URI.create("/api/batch-jobs/order-import/" + executionId))
                 .body(executionId);
+    }
+
+    @Hidden
+    @GetMapping("/")
+    public RedirectView getHome() {
+        return new RedirectView("/swagger-ui.html");
     }
 
     @Operation(summary = "Execution Job Ergebnis abfragen", description = "liefert eine Map mit Ergebnissen")
