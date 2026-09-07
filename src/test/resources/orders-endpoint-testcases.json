@@ -1,0 +1,55 @@
+[
+  {
+    "name": "getOrderImportStatus - Job 1 ist abgeschlossen",
+    "method": "GET",
+    "url": "/api/batch-jobs/order-import/1",
+    "expectedStatus": "OK",
+    "expectedBody": {
+      "exitCode": "COMPLETED",
+      "exitDescription": "",
+      "running": false
+    }
+  },
+  {
+    "name": "getOrders - Kunde C-1001 im ONLINE-Kanal liefert zwei Bestellungen",
+    "method": "GET",
+    "url": "/api/orders?customerId=C-1001&channel=ONLINE&dateFrom=2026-01-01&dateTo=2026-12-31",
+    "expectedStatus": "OK",
+    "expectedBody": {
+      "content": [
+        { "orderId": "ORD-3011", "channel": "ONLINE" },
+        { "orderId": "ORD-3026", "channel": "ONLINE" }
+      ]
+    }
+  },
+  {
+    "name": "getOrders - unbekannter Kunde liefert 404",
+    "method": "GET",
+    "url": "/api/orders?customerId=xy&channel=ONLINE&dateFrom=2026-01-01&dateTo=2026-12-31",
+    "expectedStatus": "NOT_FOUND",
+    "expectedBody": null
+  },
+  {
+    "name": "getStatistics - Kunde C-1001",
+    "method": "GET",
+    "url": "/api/customers/C-1001/statistics",
+    "expectedStatus": "OK",
+    "expectedBody": {
+      "Total Earnings": 404.93,
+      "number of Orders": 4
+    }
+  },
+  {
+    "name": "getTopCustomers - Top 5 nach Umsatz",
+    "method": "GET",
+    "url": "/api/statistics/top-customers?limit=5&dateFrom=1900-01-01&dateTo=2026-12-31",
+    "expectedStatus": "OK",
+    "expectedBody": [
+      { "customerName": "Clara Voss" },
+      { "customerName": "Bernd Klein" },
+      { "customerName": "Erika Sommer" },
+      { "customerName": "Anna Berger" },
+      { "customerName": "Dieter Wolf" }
+    ]
+  }
+]
